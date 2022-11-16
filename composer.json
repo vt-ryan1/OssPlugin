@@ -4,15 +4,15 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Author Name",
-            "email": "author@email.com",
-            "homepage": "http://author.com"
+            "name": "Richard Yan",
+            "email": "ryan@victtech.com"
         }
     ],
     "homepage": "https://github.com/victtech/ossplugin",
     "keywords": ["Laravel", "OssPlugin"],
     "require": {
-        "illuminate/support": "~9"
+        "illuminate/support": "~9",
+        "aliyuncs/oss-sdk-php": "~2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "~9.0",

@@ -35,7 +35,7 @@ class OssPluginServiceProvider extends ServiceProvider
 
         // Register the service the package provides.
         $this->app->singleton('ossplugin', function ($app) {
-            return new OssPlugin;
+            return new OssPlugin($app['session'],$app['config']);
         });
     }
 
