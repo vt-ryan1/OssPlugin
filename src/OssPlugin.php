@@ -3,6 +3,7 @@
 namespace Victtech\OssPlugin;
 
 use Illuminate\Config\Repository;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Session\SessionManager;
 use OSS\OssClient;
 
@@ -32,5 +33,40 @@ class OssPlugin
         $returnUrl = ($this->config->get('ossplugin.ALIYUN_OSS_HOST')==null)?$rs['oss-request-url']:$this->config->get('ossplugin.ALIYUN_OSS_HOST').$ossFilePath;
         return $returnUrl;
 
+    }
+
+    public function uploadFileByFile(UploadedFile $file,string $ossFilePath=null)
+    {
+        $ossBucket = $this->config->get('ossplugin.ALIYUN_OSS_BUCKET');
+        $ossEndPoint = $this->config->get('ossplugin.ALIYUN_OSS_ENDPOINT');
+        $ossFolder = $this->config->get('ossplugin.OSS_FOLADER');
+        $ossClient = new OssClient($this->config->get('ossplugin.ALIYUN_OSS_KEY'),$this->config->get('ossplugin.ALIYUN_OSS_SEC'),$ossEndPoint);
+        if($ossFilePath==null){
+            $ossFilePath = time().'_'.$file->getClientOriginalName();
+        }
+        $ossFilePath = $ossFolder.$ossFilePath;
+        $rs = $ossClient->uploadFile($ossBucket,$ossFilePath,$file);
+        $returnUrl = ($this->config->get('ossplugin.ALIYUN_OSS_HOST')==null)?$rs['oss-request-url']:$this->config->get('ossplugin.ALIYUN_OSS_HOST').$ossFilePath;
+        return $returnUrl;
+
+    }
+
+    public function removeFile($ossFile)
+    {
+        $ossBucket = $this->config->get('ossplugin.ALIYUN_OSS_BUCKET');
+        $ossEndPoint = $this->config->get('ossplugin.ALIYUN_OSS_ENDPOINT');
+        $ossClient = new OssClient($this->config->get('ossplugin.ALIYUN_OSS_KEY'),$this->config->get('ossplugin.ALIYUN_OSS_SEC'),$ossEndPoint);
+        if($this->config->get('ossplugin.ALIYUN_OSS_HOST') == null){
+            $ossFileArr = explode('/',$ossFile);
+            $ossFile = "";
+            for($i=3;$i<count($ossFileArr);$i++){
+                $ossFile .= $ossFileArr[$i].'/';
+            }
+            $ossFile = substr($ossFile,0,strlen($ossFile)-1);
+        }else{
+            $ossFile = str_replace($this->config->get('ossplugin.ALIYUN_OSS_HOST'),'',$ossFile);
+        }
+
+        $ossClient->deleteObject($ossBucket,$ossFile);
     }
 }
