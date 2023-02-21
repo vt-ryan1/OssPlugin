@@ -5,6 +5,8 @@ namespace Victtech\OssPlugin;
 use Illuminate\Config\Repository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Session\SessionManager;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use OSS\OssClient;
 
 class OssPlugin
@@ -42,7 +44,7 @@ class OssPlugin
         $ossFolder = $this->config->get('ossplugin.OSS_FOLADER');
         $ossClient = new OssClient($this->config->get('ossplugin.ALIYUN_OSS_KEY'),$this->config->get('ossplugin.ALIYUN_OSS_SEC'),$ossEndPoint);
         if($ossFilePath==null){
-            $ossFilePath = time().'_'.$file->getClientOriginalName();
+            $ossFilePath = $this->buildFileName($file->getClientOriginalName());
         }
         $ossFilePath = $ossFolder.$ossFilePath;
         $rs = $ossClient->uploadFile($ossBucket,$ossFilePath,$file);
@@ -51,7 +53,12 @@ class OssPlugin
 
     }
 
-    public function removeFile($ossFile)
+    /**
+     * 删除oss上的文件
+     * @param string $ossFile 文件路径
+     * @return void
+     */
+    public function removeFile(string $ossFile)
     {
         $ossBucket = $this->config->get('ossplugin.ALIYUN_OSS_BUCKET');
         $ossEndPoint = $this->config->get('ossplugin.ALIYUN_OSS_ENDPOINT');
@@ -69,4 +76,47 @@ class OssPlugin
 
         $ossClient->deleteObject($ossBucket,$ossFile);
     }
+
+
+    public function uploadToLocal(UploadedFile $file,string $filePath = null)
+    {
+        //计算文件路径，放到public目录下
+        $prefix = public_path('/');
+        if($this->config->get('ossplugin.LOCAL_FOLDER') ==null){
+            $prefix .= 'uploads'.'/';
+        }else{
+            $pathAtt = explode('/',str_replace('\\','/',$this->config->get('ossplugin.LOCAL_FOLDER')));
+            foreach($pathAtt as $item){
+                if($item !== null && $item !== ''){
+                    $prefix .= $item.'/';
+                }
+            }
+        }
+
+        if($filePath==null){
+            $filePath = $prefix.$this->buildFileName($file->getClientOriginalName());
+        }else{
+            $filePath = $prefix.$filePath;
+        }
+        //检测并创建目录
+        $pathAtt = explode('/',$filePath);
+        $path = '';
+        for($i = 0; $i < count($pathAtt)-1 ; $i++){
+            if($pathAtt[$i] != ''){
+                $path .= '/'.$pathAtt[$i];
+                if(is_dir($path)){
+                    continue;
+                }else{
+                    mkdir($path);
+                }
+            }
+        }
+        copy($file->path(),$filePath);
+        return $filePath;
+    }
+
+    private function buildFileName($originalName){
+        return time().'_'.str_replace(' ','_',$originalName);
+    }
+
 }

@@ -8,4 +8,5 @@ return [
     "ALIYUN_OSS_HOST"=>env('ALIYUN_OSS_HOST',null), //oss访问域名，如果没有，就是oss原始域名
     "ALIYUN_OSS_REGION"=>env('ALIYUN_OSS_REGION',null),
     "OSS_FOLADER"=>env('OSS_FOLADER',''),//oss上文件存放路径
+    "LOCAL_FOLDER" => env('LOCAL_FOLDER', null), //文件存放本地的路径
 ];
