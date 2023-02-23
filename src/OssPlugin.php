@@ -81,7 +81,8 @@ class OssPlugin
     public function uploadToLocal(UploadedFile $file,string $filePath = null)
     {
         //计算文件路径，放到public目录下
-        $prefix = public_path('/');
+        $realPath = public_path('/'); //物理真实路径
+        $prefix = '';
         if($this->config->get('ossplugin.LOCAL_FOLDER') ==null){
             $prefix .= 'uploads'.'/';
         }else{
@@ -96,10 +97,12 @@ class OssPlugin
         if($filePath==null){
             $filePath = $prefix.$this->buildFileName($file->getClientOriginalName());
         }else{
-            $filePath = $prefix.$filePath;
+            $filePath = str_replace('//','/',$prefix.str_replace('\\','/',$filePath)) ;
         }
-        //检测并创建目录
-        $pathAtt = explode('/',$filePath);
+
+        $fullPath = $realPath.$filePath;
+        //检测路径目录是否存在,并创建目录
+        $pathAtt = explode('/',$fullPath);
         $path = '';
         for($i = 0; $i < count($pathAtt)-1 ; $i++){
             if($pathAtt[$i] != ''){
@@ -111,7 +114,7 @@ class OssPlugin
                 }
             }
         }
-        copy($file->path(),$filePath);
+        copy($file->path(),$fullPath);
         return $filePath;
     }
 
