@@ -11,7 +11,7 @@
     "homepage": "https://github.com/victtech/ossplugin",
     "keywords": ["Laravel", "OssPlugin"],
     "require": {
-        "illuminate/support": "^9.1.0",
+        "illuminate/support": "^v10.0.0",
         "aliyuncs/oss-sdk-php": "^2.0"
     },
     "require-dev": {
